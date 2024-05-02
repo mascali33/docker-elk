@@ -3,13 +3,14 @@
 import os
 import json
 
-def parse_log_line(line):
+def parse_log_line(line, counter):
     parts = line.strip().split('\t')
     print(f"Parsing line: {line.strip()} -> Parts: {len(parts)}")  # Debug: print parts count
     if len(parts) < 5:
         print("Skipping line: insufficient parts")  # Debug: indicate skipped line
         return None
     log_entry = {
+    	"id": counter,
         "code": parts[0],
         "date": parts[1],
         "time": parts[2],
@@ -26,6 +27,7 @@ def parse_log_line(line):
 
 def process_directory(directory):
     logs = []
+    counter = 1
     for filename in os.listdir(directory):
         if filename.endswith('.his'):
             file_path = os.path.join(directory, filename)
@@ -33,16 +35,18 @@ def process_directory(directory):
             try:
                 with open(file_path, 'r', encoding='utf-8') as file:
                     for line in file:
-                        log_entry = parse_log_line(line)
+                        log_entry = parse_log_line(line, counter)
                         if log_entry:
                             logs.append(log_entry)
+                            counter += 1
             except UnicodeDecodeError:
                 # Try a different encoding if UTF-8 fails
                 with open(file_path, 'r', encoding='iso-8859-1') as file:
                     for line in file:
-                        log_entry = parse_log_line(line)
+                        log_entry = parse_log_line(line, counter)
                         if log_entry:
                             logs.append(log_entry)
+                            counter += 1
     if not logs:
         print("No logs were added.")  # Debug: indicate if no logs were collected
     return logs
