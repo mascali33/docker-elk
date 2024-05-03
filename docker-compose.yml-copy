@@ -144,6 +144,22 @@ services:
     depends_on:
       - elasticsearch
 
+  # grafana:
+  #   env_file: ${PWD}/.env
+  #   build:
+  #     context: grafana/
+  #   # volumes:
+  #   #   - ./grafana/config/grafana.yml:/etc/grafana/grafana.ini:ro,Z
+  #   #   - grafana-data:/var/lib/grafana:Z
+  #   ports:
+  #     - 3000:3000
+  #   networks:
+  #     - elk
+  #   depends_on:
+  #     - elasticsearch
+  #   # restart: unless-stopped
+
+
 networks:
   elk:
     driver: bridge
