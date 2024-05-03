@@ -24,43 +24,44 @@ def parse_log_line(line, counter):
         log_entry["signal_strength"] = parts[6]
     return log_entry
 
-
-def process_directory(directory):
+def process_file(file_path):
     logs = []
     counter = 1
-    for filename in os.listdir(directory):
-        if filename.endswith('.his'):
-            file_path = os.path.join(directory, filename)
-            print(f"Processing file: {file_path}")  # Debug: print file being processed
-            try:
-                with open(file_path, 'r', encoding='utf-8') as file:
-                    for line in file:
-                        log_entry = parse_log_line(line, counter)
-                        if log_entry:
-                            logs.append(log_entry)
-                            counter += 1
-            except UnicodeDecodeError:
-                # Try a different encoding if UTF-8 fails
-                with open(file_path, 'r', encoding='iso-8859-1') as file:
-                    for line in file:
-                        log_entry = parse_log_line(line, counter)
-                        if log_entry:
-                            logs.append(log_entry)
-                            counter += 1
-    if not logs:
-        print("No logs were added.")  # Debug: indicate if no logs were collected
+    try:
+        with open(file_path, 'r', encoding='utf-8') as file:
+            for line in file:
+                log_entry = parse_log_line(line, counter)
+                if log_entry:
+                    logs.append(log_entry)
+                    counter += 1
+    except UnicodeDecodeError:
+        # Try a different encoding if UTF-8 fails
+        with open(file_path, 'r', encoding='iso-8859-1') as file:
+            for line in file:
+                log_entry = parse_log_line(line, counter)
+                if log_entry:
+                    logs.append(log_entry)
+                    counter += 1
     return logs
 
 def save_as_json(logs, output_file):
     with open(output_file, 'w', encoding='utf-8') as f:
         json.dump(logs, f, indent=4)
 
+def process_directory(directory):
+    for filename in os.listdir(directory):
+        if filename.endswith('.his'):
+            file_path = os.path.join(directory, filename)
+            print(f"Processing file: {file_path}")  # Debug: print file being processed
+            logs = process_file(file_path)
+            if logs:
+                output_json_file = f"{filename[:-4]}.json"  # Create JSON file name based on HIS file
+                save_as_json(logs, os.path.join(directory, output_json_file))
+                print(f"Processed logs saved to {output_json_file}")
+            else:
+                print(f"No logs were added for {filename}.")  # Debug: indicate if no logs were collected
+
 # Usage
 directory = '.'  # Set to your directory containing .his files
-output_json_file = 'billing.json' # Set the desired output JSON file path
-
-logs = process_directory(directory)
-save_as_json(logs, output_json_file)
-
-print(f"Processed logs saved to {output_json_file}")
+process_directory(directory)
 
