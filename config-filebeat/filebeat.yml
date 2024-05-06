@@ -21,13 +21,7 @@ filebeat.inputs:
         add_error_key: true
         expand_keys: true
 
-#logging.level: info
-#logging.to_files: true
-#logging.files:
- # path: ${PWD}/debug_logs/filebeat
- # name: filebeat
-  #keepfiles: 7
-  #permissions: 0640
+# logging.level: debugx²
 #processors:
   #- add_cloud_metadata: ~
 
@@ -39,9 +33,9 @@ monitoring:
 
 output.elasticsearch:
   hosts: [ http://elasticsearch:9200 ]
-  username: elastic
-  password: ${LOGSTASH_INTERNAL_PASSWORD}
-  index: "%{[fields.log_type]}-%{[agent.version]}-%{+yyyy.MM.dd}-"
+  username: "filebeat_internal"
+  password: ${FILEBEAT_INTERNAL_PASSWORD}
+  index: "billing-%{[fields.log_type]}-%{[agent.version]}-%{+yyyy.MM.dd}-"
 
 setup.ilm:
   policy_name: "billing"
@@ -51,8 +45,8 @@ setup.ilm:
  #   password: ${BEATS_SYSTEM_PASSWORD}
 
 setup.template:
-  name: "billing-logs"
-  pattern: "billing-logs-*"
+  name: "billing"
+  pattern: "billing-*"
 
 #output.elasticsearch:
  # hosts: [ http://elasticsearch:9200]
