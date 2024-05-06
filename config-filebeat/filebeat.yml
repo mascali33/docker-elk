@@ -14,25 +14,45 @@ filebeat.inputs:
   id: etelm-logs-id
   enabled: true
   paths:
-    - ${PWD}/logs/*.json
+    - /usr/share/filebeat/logs/*.ndjson
   parsers:
     - ndjson:
         keys_under_root: true
         add_error_key: true
         expand_keys: true
 
-processors:
-  - add_cloud_metadata: ~
+#logging.level: info
+#logging.to_files: true
+#logging.files:
+ # path: ${PWD}/debug_logs/filebeat
+ # name: filebeat
+  #keepfiles: 7
+  #permissions: 0640
+#processors:
+  #- add_cloud_metadata: ~
 
 monitoring:
   enabled: false
+  elasticsearch:
+    username: monitoring_internal
+    password: ${MONITORING_INTERNAL_PASSWORD}
+
+output.elasticsearch:
+  hosts: [ http://elasticsearch:9200 ]
+  username: elastic
+  password: ${LOGSTASH_INTERNAL_PASSWORD}
+  index: "%{[fields.log_type]}-%{[agent.version]}-%{+yyyy.MM.dd}-"
+
+setup.ilm:
+  policy_name: "billing"
+  check_exists: false  
  # elasticsearch:
  #   username: beats_system
  #   password: ${BEATS_SYSTEM_PASSWORD}
 
-#setup.template:
- # name: "billing-logs"
- # pattern: "billing-logs-*"
+setup.template:
+  name: "billing-logs"
+  pattern: "billing-logs-*"
 
 #output.elasticsearch:
  # hosts: [ http://elasticsearch:9200]
@@ -41,8 +61,8 @@ monitoring:
  # data_stream: "false"
  # enabled: false
 
-output.logstash:
-  hosts: [ "logstash:5044" ]
+# output.logstash:
+#   hosts: [ "logstash:5044" ]
 
 ## HTTP endpoint for health checking
 ## https://www.elastic.co/guide/en/beats/filebeat/current/http-endpoint.html
